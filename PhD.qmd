@@ -1,0 +1,41 @@
+---
+title: "PhD Chapter Summary"
+author: "Ross Whippo"
+format: html
+editor: visual
+---
+
+## Chapter 1 - Antarctic Algal Fatty Acids
+
+### Summary
+
+Macroalgae synthesize fatty acids (FA) that higher tropic levels consume to maintain their fundamental biological processes.  The FA content of Antarctic algae have only been described for a limited number of groups including 16 species from 11 families. As part of an NSF-funded project aimed at describing the macroalgal communities of Antarctica, I will be analysing a subset of  algal tissues collected during the project to describe the fatty-acid profiles of 32 species, half of which have no published FA profiles. 
+
+### Methods
+
+Field methods Algal samples were collected from the Western Antarctic Peninsula (WAP) from April-May 2019 via SCUBA at 13 sites spanning approximately 5° of latitude. Algal tissues were collected by hand between 5-40m depth and frozen at -80° C for transport back to the lab for extraction and analysis.
+
+### Fatty acid profiles 
+
+Three representative replicates of each species were extracted from the tissues (sample size allowing) and were processed in a gas chromatograph equipped with a mass spectrometer (GCMS). All chromatograms will be integrated and scored, then processed to identify FA content and analyzed using PERMANOVA with the 'vegan' package in R to detect differences among species. Once all samples are analysed, I will summarise their profiles for publication as a fundamental analysis of nearshore Antarctic trophic ecology. 
+ 
+### Results
+
+
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
