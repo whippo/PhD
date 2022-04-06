@@ -2,40 +2,218 @@
 title: "PhD Chapter Summary"
 author: "Ross Whippo"
 format: html
+toc: true
+toc-depth: 3
 editor: visual
+bibliography: references.bib 
+link-citations: TRUE 
 ---
 
 ## Chapter 1 - Antarctic Algal Fatty Acids
 
-### Summary
+### Cover Letter
 
-Macroalgae synthesize fatty acids (FA) that higher tropic levels consume to maintain their fundamental biological processes.  The FA content of Antarctic algae have only been described for a limited number of groups including 16 species from 11 families. As part of an NSF-funded project aimed at describing the macroalgal communities of Antarctica, I will be analysing a subset of  algal tissues collected during the project to describe the fatty-acid profiles of 32 species, half of which have no published FA profiles. 
+> Dear person,
+>
+> Publish this manuscript.
+>
+> Yours truly,
+>
+> Ross Whippo
 
-### Methods
+### Abstract
+
+Macroalgae synthesize fatty acids (FA) that higher tropic levels consume to maintain their fundamental biological processes. The FA content of Antarctic algae have only been described for a limited number of groups including 16 species from 11 families. As part of an NSF-funded project aimed at describing the macroalgal communities of Antarctica, I will be analysing a subset of algal tissues collected during the project to describe the fatty-acid profiles of 32 species, half of which have no published FA profiles.
 
 Field methods Algal samples were collected from the Western Antarctic Peninsula (WAP) from April-May 2019 via SCUBA at 13 sites spanning approximately 5° of latitude. Algal tissues were collected by hand between 5-40m depth and frozen at -80° C for transport back to the lab for extraction and analysis.
 
-### Fatty acid profiles 
+Three representative replicates of each species were extracted from the tissues (sample size allowing) and were processed in a gas chromatograph equipped with a mass spectrometer (GCMS). All chromatograms will be integrated and scored, then processed to identify FA content and analyzed using PERMANOVA with the 'vegan' package in R to detect differences among species. Once all samples are analysed, I will summarise their profiles for publication as a fundamental analysis of nearshore Antarctic trophic ecology.
 
-Three representative replicates of each species were extracted from the tissues (sample size allowing) and were processed in a gas chromatograph equipped with a mass spectrometer (GCMS). All chromatograms will be integrated and scored, then processed to identify FA content and analyzed using PERMANOVA with the 'vegan' package in R to detect differences among species. Once all samples are analysed, I will summarise their profiles for publication as a fundamental analysis of nearshore Antarctic trophic ecology. 
- 
 ### Results
-
-
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
-```
-
-You can add options to executable code like this
 
 ```{r}
 #| echo: false
-2 * 2
+#| warnings: false
+#| message: false
+#| output: false
+
+# load libraries
+
+library(tidyverse)
+library(vegan)
+library(viridis)
+
+
+# load data
+Whippo_FA_extraction_log <- read_csv("C:/Users/rossw/Dropbox/OSF/Fatty Acid Extractions/Whippo_FA_extraction_log.csv") #windows
+
+grad_conc <- read_csv("~/Git/SeaweedGradients/grad_conc_QAQC.csv")
+
+# pivot data wide for mds
+grad_conc_wide <- grad_conc %>%
+  select(FA, species, proportion, sample) %>%
+  pivot_wider(names_from = FA, values_from = proportion, values_fill = 0)
+
+# select EPA, ARA, SDA, PAL, OLE, LIN, VAC, and dominant sats (16, 18)
+sub_wide <- grad_conc_wide %>%
+  select(species, sample, "14:0", "16:0", "16:1w7c", "18:0", "18:1w7c", "18:3w3", "18:4w3c", "18:1w9c", "20:4w6", "20:5w3")
+sub_wide_trans <- (sub_wide[,3:12])
+sub_wide_trans <- bind_cols(sub_wide[1:2], sub_wide_trans)
+
+batch_1_2_MDS <- metaMDS(sub_wide_trans[3:12], autotransform = FALSE, distance = "kulczynski")
+batch_1_2_MDS_points <- batch_1_2_MDS$points
+batch_1_2_MDS_points <- data.frame(batch_1_2_MDS_points)
+plot_data_batch_1_2 <- data.frame(batch_1_2_MDS_points, sub_wide[,1])
+
+library(plyr)
+# create the list of points that will connect the 'hulls' together from your nMDS point data
+chulls_tax <- ddply(plot_data_batch_1_2, .(species), function(df) df[chull(df$MDS1, df$MDS2), ])
+# DETACH PLYR so it won't mess with anything!
+detach(package:plyr)
+
+# create vectors to plot over MDS
+scrs <- as.data.frame(scores(batch_1_2_MDS, display = "sites"))
+scrs <- cbind(scrs, species = sub_wide_trans$species)
+
+vf <- envfit(batch_1_2_MDS, sub_wide_trans[3:12], perm = 999)
+
+spp.scrs <- as.data.frame(scores(vf, display = "vectors"))
+spp.scrs <- cbind(spp.scrs, FA = rownames(spp.scrs))
+spp.scrs <- spp.scrs %>%
+  rename(MDS1 = NMDS1,
+         MDS2 = NMDS2)
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+#| echo: false
+#| warnings: false
+#| message: false
+
+ggplot(plot_data_batch_1_2, aes(x=MDS1, y=MDS2)) +
+  coord_fixed() +
+  geom_point(size = 4, aes(color = species)) + # set size of points to whatever you want
+  scale_color_viridis(discrete = TRUE, end = 0.9) + # my favorite color-blind and b&w friendly palette, look at the viridis package for more details
+  geom_segment(data = spp.scrs,
+               aes(x = 0, xend = MDS1, y = 0, yend = MDS2),
+               arrow = arrow(length = unit(0.25, "cm")), color = "grey") +
+  geom_text(data = spp.scrs, aes(label = FA), 
+            size = 3) +
+  geom_polygon(data = chulls_tax,
+               aes(x = MDS1, y = MDS2, color = species), 
+               fill = NA) + # optional 'hulls' around points
+  theme_classic()  # optional, I just like this theme
+
+```
+
+## Chapter 2 - Urchin Behavior In Response To A Predatory Seastar
+
+### Cover Letter
+
+> Dear person,
+>
+> Publish this manuscript.
+>
+> Yours truly,
+>
+> Ross Whippo
+
+### Abstract
+
+To determine the effects, if any, of *Pycnopodia* presence on *S. purpuratus* behavior, two experiments were run:
+
+Experiment 1 consisted of placing individual urchins in containers within a larger flow-through seawater system that either had a *Pycnopodia* in the header tank or not. The '*Pycnopodia* exposed' and 'control' groups were run concurrently, and urchins were fed standardized pieces of the kelp *Nereocystis* ad lib.. Consumption rates were tracked over approximately four days for each urchin. These trials were run for a total of 5 replicates (exposed and control), using 71 urchins total.
+
+Experiment 2 was run in two circular 'arenas' in which individual urchin movement and behavior was tracked over one hour. The urchin was either 'starved' or 'fed', and was exposed to *Nereocystis* or an algal 'dummy', and *Pycnopodia* signal or 'control' water, in a fully crossed design (starvation state × algae × *Pycnopodia*). Each replicate trial was run at least six times for a total of 49 individual trials. Each minute of the trial urchin behavior was noted for the following categories: distance (in cm from 'signal' in the center of the arena); interaction (qualitative measure of the urchin 'interacting' with the center signal source or 'not interacting'); algae consumed (in cm^2^, recorded at the end of trials in which algae was presented to the urchin).
+
+### Results
+
+```{r}
+#| echo: false
+#| warnings: false
+#| message: false
+
+
+# load data
+model_1_dat_5 <- read_csv("~/Git/pycno-urchin/model_1_dat_5.csv")
+
+model_1_plotdat_5 <- model_1_dat_5 %>%
+  unite(Treatment, pycnoTreat, algalTreat, sep = "/" ) %>%
+  mutate(Treatment = case_when(Treatment == "pycno/control" ~ "Pycno",
+                            Treatment == "control/nereo" ~ "Nereo",
+                            Treatment == "control/control" ~ "Control",
+                            Treatment == "pycno/nereo" ~ "Pycno/Nereo")) 
+treatMeans <- model_1_plotdat_5 %>%
+  group_by(Treatment, urchinGroup) %>%
+  summarise(treatMean = mean(interacting))
+
+model_1_plotdat_5 <- model_1_plotdat_5 %>%
+  left_join(treatMeans)
+  
+theme_set(theme_light(base_size = 18))
+
+control_avg <- 
+  model_1_plotdat_5 %>%
+  ungroup() %>%
+  filter(Treatment == "Control") %>%
+  summarize(avg = mean(interacting)) %>%
+  pull(avg)
+
+
+model_1_plotdat_5 %>%
+  ggplot(aes(y = interacting, x = Treatment, color = urchinGroup)) +
+  geom_hline(aes(yintercept = control_avg), color = "gray70", size = 0.6) +
+  geom_jitter(position = position_jitter(seed = 227, width = 0.2), size = 2, alpha = 0.20) +
+  stat_summary(fun = mean, geom = "point", size = 5, pch = 17, position = position_jitter(seed = 227)) +
+  scale_y_continuous(
+    limits = c(-0.1, 1.1), expand = c(0.005, 0.005)) +
+  coord_flip() +
+  scale_color_viridis(discrete = TRUE, begin = 0.1, end = 0.8) +
+  labs(color = "Urchin Group") +
+  labs(y = "Proportion Time Interacting", x = NULL) +
+  theme(
+    axis.title = element_text(size = 16),
+   axis.text.x = element_text(size = 12),
+    panel.grid = element_blank()
+  ) 
+
+```
+
+## Chapter 3 - Starvation Thresholds Change Urchin Response To Predatory Cues
+
+### Cover Letter
+
+> Dear person,
+>
+> Publish this manuscript.
+>
+> Yours truly,
+>
+> Ross Whippo
+
+### Abstract
+
+In lab trials, I found that the presence of *Pycnopodia* inhibited algal consumption in well-fed urchins, but failed to dissuade starved urchins from feeding. However, whether urchins will exhibit similar patterns of behavior in the field, and at what nutritional threshold they will risk predation to consume algae, remains unknown.
+
+Primary Question: What are the relative risks urchins of different nutritional states will take *in situ* to access food in the presence of a predator?
+
+Q1: what is the nutritional threshold (starvation time) at which urchins will risk predation to consume algae?
+
+Q2: how much algae will an urchin eat as a function of nutritional state in the presence and absence of a predator in field mesocosms?
+
+Field work will be done from the University of Washington's Friday Harbor Laboratories (FHL) using subtidal enclosures. Pycnopodia (n=4) and urchins (n=160) will be collected from known populations, and held in existing infrastructure at FHL. Past work has indicated that 7 weeks is sufficient starvation time to produce significantly smaller gonads (a measure of nutritional state) compared with fed urchins; therefore, my trials encompass this time point to detect behavior-related differences. Urchins will be separated into 40 paired groups (n=4 each group) creating replicate groups of starvation times ranging from 0 weeks starved to 9 weeks starved in 1-week increments. Enclosures for all experiments will consist of vexar fencing installed around existing cement blocks in 30 ft of water. Using in situ diver observations and GoPro video, Pycnopodia and urchin behavior will be quantified, and consumption of algae tracked.  
+
+I predict that urchins will exhibit a threshold at which they will risk predation to access algal resources. From previous experiments I believe that threshold will be greater than one week, but less than seven of starvation. I also predict that the longer urchins are starved, the more algae they will consume in a given time period. 
+
+### Results
+
+```{r}
+#| echo: false
+#| warnings: false
+#| message: false
+
+
+# load data
+
+
+```

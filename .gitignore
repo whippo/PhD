@@ -38,6 +38,15 @@ vignettes/*.pdf
 # html files created by R markdown
 *.html
 
+# docx files
+*.docx
+
+# tex files
+*.tex
+
+# log files 
+*.log
+
 # R Environment Variables
 .Renviron
 
