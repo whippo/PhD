@@ -5,7 +5,6 @@ format: html
 toc: true
 toc-depth: 3
 editor: visual
-bibliography: references.bib 
 link-citations: TRUE 
 ---
 
@@ -106,7 +105,7 @@ ggplot(plot_data_batch_1_2, aes(x=MDS1, y=MDS2)) +
 
 ```
 
-## Chapter 2 - Urchin Behavior In Response To A Predatory Seastar
+## Chapter 2 - Endangered predatory seastars mediate urchin feeding rates through indirect interactions
 
 ### Cover Letter
 
@@ -120,7 +119,7 @@ ggplot(plot_data_batch_1_2, aes(x=MDS1, y=MDS2)) +
 
 ### Abstract
 
-To determine the effects, if any, of *Pycnopodia* presence on *S. purpuratus* behavior, two experiments were run:
+Predators can influence prey behavior through direct and indirect actions such as actively pursuing prey and making them scared respectively. These actions can result in various responses of the prey including avoidance behavior and reduced foraging. In the Northeast Pacific, the collapse of now-endangered predatory sunflower seastar (*Pycnopodia helianthoides*) populations has been implicated as a driving factor behind recent declines in kelp forest cover through over-grazing by sea urchins. While there is anecdotal and corrleative evidence suggesting that sunflower stars may be linked to these collapses via a trophic cascade, no definitive behavioral evidence has linked the presence of sunflower stars in the environment with reduced feeding capacity of sea urchins. We tested the presence and strength of indirect effects of sunflower stars on the feeding rate and behavior of the purple sea urchin (*Strongylocentrotus purpuratus*). Sea urchins exposed to indirect sunflower star cues consumed 59% less algae than urchins that were not over a 3-day period, however, exposed urchins may have become acclimated to the predator cue by the end of the trials resulting in similar rates of consumption over longer time-periods. In contrast, urchins in a starvation-state were found to consume algae regardless of seastar presence or absence compared to well-fed individuals. This study provides the first evidence directly linking sunflower seastars to changes in sea urchin feeding behavior over several days. As sunflower seastar populations begin to recover, these data will provide valuable predictive power for how that recover may change kelp forest communities.
 
 Experiment 1 consisted of placing individual urchins in containers within a larger flow-through seawater system that either had a *Pycnopodia* in the header tank or not. The '*Pycnopodia* exposed' and 'control' groups were run concurrently, and urchins were fed standardized pieces of the kelp *Nereocystis* ad lib.. Consumption rates were tracked over approximately four days for each urchin. These trials were run for a total of 5 replicates (exposed and control), using 71 urchins total.
 
@@ -177,6 +176,29 @@ model_1_plotdat_5 %>%
     panel.grid = element_blank()
   ) 
 
+
+# load data
+urchin_fear_pycno <-
+  read_csv('~/Git/pycno-urchin/Data/2020/urchin_fear_feeding_pycno-trial-1.csv')
+
+# combine trial and bin to prevent combining urchins across trials
+urchin_fear_pycno <-
+  unite(urchin_fear_pycno,
+        'ID',
+        trial,
+        bin,
+        sep = "_",
+        remove = FALSE)
+  urchin_fear_mix_data <- urchin_fear_pycno %>%
+    filter(treatment != 'bucket') %>%
+    filter(timepoint != '0')
+per_urchin_consumed_total <- urchin_fear_pycno %>%
+  group_by(trial, bin, tank, ID, pycno) %>%
+  summarise(`total consumed` = sum(consumed)) %>%
+  ungroup()
+
+  # is total amount of confetti consumed per trial different between groups?
+  t.test(`total consumed` ~ pycno, data = per_urchin_consumed_total)
 ```
 
 ## Chapter 3 - Starvation Thresholds Change Urchin Response To Predatory Cues
@@ -201,9 +223,9 @@ Q1: what is the nutritional threshold (starvation time) at which urchins will ri
 
 Q2: how much algae will an urchin eat as a function of nutritional state in the presence and absence of a predator in field mesocosms?
 
-Field work will be done from the University of Washington's Friday Harbor Laboratories (FHL) using subtidal enclosures. Pycnopodia (n=4) and urchins (n=160) will be collected from known populations, and held in existing infrastructure at FHL. Past work has indicated that 7 weeks is sufficient starvation time to produce significantly smaller gonads (a measure of nutritional state) compared with fed urchins; therefore, my trials encompass this time point to detect behavior-related differences. Urchins will be separated into 40 paired groups (n=4 each group) creating replicate groups of starvation times ranging from 0 weeks starved to 9 weeks starved in 1-week increments. Enclosures for all experiments will consist of vexar fencing installed around existing cement blocks in 30 ft of water. Using in situ diver observations and GoPro video, Pycnopodia and urchin behavior will be quantified, and consumption of algae tracked.  
+Field work will be done from the University of Washington's Friday Harbor Laboratories (FHL) using subtidal enclosures. Pycnopodia (n=4) and urchins (n=160) will be collected from known populations, and held in existing infrastructure at FHL. Past work has indicated that 7 weeks is sufficient starvation time to produce significantly smaller gonads (a measure of nutritional state) compared with fed urchins; therefore, my trials encompass this time point to detect behavior-related differences. Urchins will be separated into 40 paired groups (n=4 each group) creating replicate groups of starvation times ranging from 0 weeks starved to 9 weeks starved in 1-week increments. Enclosures for all experiments will consist of vexar fencing installed around existing cement blocks in 30 ft of water. Using in situ diver observations and GoPro video, Pycnopodia and urchin behavior will be quantified, and consumption of algae tracked.
 
-I predict that urchins will exhibit a threshold at which they will risk predation to access algal resources. From previous experiments I believe that threshold will be greater than one week, but less than seven of starvation. I also predict that the longer urchins are starved, the more algae they will consume in a given time period. 
+I predict that urchins will exhibit a threshold at which they will risk predation to access algal resources. From previous experiments I believe that threshold will be greater than one week, but less than seven of starvation. I also predict that the longer urchins are starved, the more algae they will consume in a given time period.
 
 ### Results
 
